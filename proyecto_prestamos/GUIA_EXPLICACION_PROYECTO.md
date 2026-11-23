@@ -203,6 +203,7 @@ Este apartado recopila todos los cambios y mejoras incorporadas cronológicament
 | **14** | 2026-11-23 | Gestión de autorización y despliegue autónomo en Railway. | Coordinación del flujo de autenticación OAuth de Railway y preparación para aprovisionamiento directo del servicio cloud. |
 | **15** | 2026-11-23 | Creación de Proyecto, Servicio y Dominio en Railway y Remote GitHub. | Se creó en Railway el proyecto `gestion_de_prestamos`, el servicio `gestion_de_prestamos` y se asignó el dominio público `https://gestiondeprestamos-production-e552d9f2.up.railway.app`. Se enlazó el repositorio remoto `luanmogro-cyber/gestion_de_prestamos`. |
 | **16** | 2026-11-23 | Diagnóstico de autenticación interactiva de Git y conexión Railway. | Identificación de requerimiento de autorización de Git Credential Manager en Windows para el primer push interactivo hacia GitHub. |
+| **17** | 2026-11-23 | Selección de Credential Helper para Git en Windows. | Guía para seleccionar `manager` (Git Credential Manager) y recordar la preferencia para autorizar la sincronización con GitHub. |
 
 ---
 

@@ -364,3 +364,15 @@ proyecto_prestamos/
      - No existen credenciales interactivas de Git almacenadas en el sistema local Windows Credential Manager.
      - Para repositorios privados o recién creados, GitHub exige autenticación interactiva (ventana de navegador OAuth de Git Credential Manager) al hacer el primer push.
      - Se solicita al usuario confirmar la URL exacta creada o ejecutar `git push -u origin main` en su terminal de Laragon para autorizar con un clic en la ventana emergente de GitHub.
+
+
+---
+
+### Registro 17: Selección de Git Credential Helper y Autorización en Windows
+- **Fecha:** 2026-11-23
+- **Captura / Situación Reportada por el Usuario:**
+  Aparición de la ventana de diálogo `CredentialHelperSelector` de Windows para Git.
+- **Acciones / Instrucciones Guiadas:**
+  1. Se explicó que la opción `manager` (Git Credential Manager) ya seleccionada es la adecuada para conectarse con GitHub de forma segura.
+  2. Se instruyó al usuario a marcar la casilla *"Always use this from now on"* para no requerir confirmación en futuros commits.
+  3. Se instruyó hacer clic en el botón *"Select"* para dar paso a la ventana de autorización OAuth en el navegador web de GitHub.
