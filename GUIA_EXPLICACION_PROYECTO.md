@@ -200,6 +200,7 @@ Este apartado recopila todos los cambios y mejoras incorporadas cronológicament
 | **11** | 2026-11-23 | Corrección de contraste en panel de Pagos y Cobranzas. | Se forzó color de texto `#78350F !important` con borde contrastado en `lbl_debt_info` y formato HTML legible en el desglose de deuda (mora, interés, capital). |
 | **12** | 2026-11-23 | Diagnóstico y solución de ejecución en PowerShell (`pip`/`python` no reconocido). | Explicación del entorno aislado de Laragon Python 3.13; verificación de paquetes preinstalados (`PySide6`, `bcrypt`, `reportlab`) y creación de scripts `ejecutar.bat` para arranque automático con un solo clic. |
 | **13** | 2026-11-23 | Inicialización de Git y preparación para despliegue en Railway Cloud. | Configuración de `.gitignore`, inicialización del repositorio Git local, creación del servicio web `web_app.py` con monitoreo de salud `/health`, y descriptores `Procfile` / `railway.json` para despliegue en contenedores Railway. |
+| **14** | 2026-11-23 | Gestión de autorización y despliegue autónomo en Railway. | Coordinación del flujo de autenticación OAuth de Railway y preparación para aprovisionamiento directo del servicio cloud. |
 
 ---
 
