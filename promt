@@ -349,3 +349,18 @@ proyecto_prestamos/
      - Se identificó la cuenta de GitHub del usuario (`luanmogro-cyber`).
      - Se configuró el origen remoto: `https://github.com/luanmogro-cyber/gestion_de_prestamos.git`.
      - Se preparó el enlace directo para la creación del repositorio vacío en GitHub a fin de recibir el `git push` y enlazar el webhook de Railway.
+
+
+---
+
+### Registro 16: Diagnóstico de Permisos de Repositorio en GitHub y Railway
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "listo" (Confirmación de creación del repositorio en GitHub)
+- **Diagnóstico Realizado:**
+  1. Se intentó ejecutar `git push -u origin main` hacia `https://github.com/luanmogro-cyber/gestion_de_prestamos.git`.
+  2. GitHub y Railway reportaron: `remote: Repository not found` / `User does not have access to the repo`.
+  3. Causa técnica:
+     - No existen credenciales interactivas de Git almacenadas en el sistema local Windows Credential Manager.
+     - Para repositorios privados o recién creados, GitHub exige autenticación interactiva (ventana de navegador OAuth de Git Credential Manager) al hacer el primer push.
+     - Se solicita al usuario confirmar la URL exacta creada o ejecutar `git push -u origin main` en su terminal de Laragon para autorizar con un clic en la ventana emergente de GitHub.
