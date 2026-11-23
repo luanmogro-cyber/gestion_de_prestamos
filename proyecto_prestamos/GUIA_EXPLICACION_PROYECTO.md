@@ -201,6 +201,7 @@ Este apartado recopila todos los cambios y mejoras incorporadas cronológicament
 | **12** | 2026-11-23 | Diagnóstico y solución de ejecución en PowerShell (`pip`/`python` no reconocido). | Explicación del entorno aislado de Laragon Python 3.13; verificación de paquetes preinstalados (`PySide6`, `bcrypt`, `reportlab`) y creación de scripts `ejecutar.bat` para arranque automático con un solo clic. |
 | **13** | 2026-11-23 | Inicialización de Git y preparación para despliegue en Railway Cloud. | Configuración de `.gitignore`, inicialización del repositorio Git local, creación del servicio web `web_app.py` con monitoreo de salud `/health`, y descriptores `Procfile` / `railway.json` para despliegue en contenedores Railway. |
 | **14** | 2026-11-23 | Gestión de autorización y despliegue autónomo en Railway. | Coordinación del flujo de autenticación OAuth de Railway y preparación para aprovisionamiento directo del servicio cloud. |
+| **15** | 2026-11-23 | Creación de Proyecto, Servicio y Dominio en Railway y Remote GitHub. | Se creó en Railway el proyecto `gestion_de_prestamos`, el servicio `gestion_de_prestamos` y se asignó el dominio público `https://gestiondeprestamos-production-e552d9f2.up.railway.app`. Se enlazó el repositorio remoto `luanmogro-cyber/gestion_de_prestamos`. |
 
 ---
 

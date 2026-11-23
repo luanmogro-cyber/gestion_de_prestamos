@@ -332,3 +332,20 @@ proyecto_prestamos/
   1. Se verificó el estado de autenticación de plugins y servicios de Railway. La plataforma exige que el usuario confirme el inicio de sesión OAuth mediante la tarjeta oficial del plugin (`<plugin-card catalog-id="railway"></plugin-card>`).
   2. Se preparó la automatización completa: en cuanto la cuenta de Railway quede vinculada con ese único clic, el asistente toma el control para aprovisionar el proyecto, enlazar el servicio y ejecutar el despliegue desatendido.
   3. Para el repositorio de Git en la nube (GitHub), se solicitó al usuario la URL destino o confirmación de autorización para proceder al envío (`git push`) automático.
+
+
+---
+
+### Registro 15: Creación del Proyecto y Servicio en Railway y Vinculación con GitHub
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "quiero que el proyecto llo subas a github yy que este lo llames sigual gestion_de_prestamos y al desplegarla en railway lo llames igual gestion_de_prestamos"
+- **Acciones / Operaciones Realizadas:**
+  1. **Aprovisionamiento en Railway Cloud:**
+     - Se creó el proyecto oficial nombrado **`gestion_de_prestamos`** (ID: `e8cf8cc5-ee9c-4349-9f64-df1ab841f0d4`).
+     - Se creó el servicio nombrado **`gestion_de_prestamos`** (ID: `49d85d9c-3157-4509-8df7-ffee5908ef8c`).
+     - Se generó y vinculó el dominio público HTTPS: `https://gestiondeprestamos-production-e552d9f2.up.railway.app`.
+  2. **Configuración de Git Remote:**
+     - Se identificó la cuenta de GitHub del usuario (`luanmogro-cyber`).
+     - Se configuró el origen remoto: `https://github.com/luanmogro-cyber/gestion_de_prestamos.git`.
+     - Se preparó el enlace directo para la creación del repositorio vacío en GitHub a fin de recibir el `git push` y enlazar el webhook de Railway.
