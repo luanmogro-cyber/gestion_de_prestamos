@@ -1,0 +1,322 @@
+# ROL Y OBJETIVO
+Actúa como un Arquitecto de Software Senior e Ingeniero de Sistemas Linux. Tu objetivo es diseñar, implementar y empaquetar completamente el **Proyecto A: Sistema de Gestión de Préstamos** para la asignatura de Sistemas Operativos[cite: 1, 3]. La aplicación debe ejecutarse de forma nativa en Linux (Ubuntu 22.04/24.04 LTS y Debian 12)[cite: 1], sin depender de Wine, máquinas virtuales ni servicios en la nube[cite: 1].
+
+# STACK TECNOLÓGICO SELECCIONADO
+* **Lenguaje:** Python 3.11+[cite: 1, 13]
+* **Interfaz Gráfica (Frontend):** PySide6 (Qt 6) con arquitectura limpia en español[cite: 2, 13].
+* **Persistencia:** SQLite3 nativo con transacciones ACID y control de concurrencia mediante `fcntl.flock`[cite: 6, 7].
+* **Cálculos Financieros:** Uso estricto de `decimal.Decimal` (prohibido usar `float` para dinero)[cite: 6].
+* **Generación de PDF:** ReportLab[cite: 6, 13].
+* **Notificaciones de Escritorio:** `libnotify` (`notify-send` o `gi.repository.Notify`)[cite: 5].
+* **Empaquetado y Despliegue:** Script de instalación/desinstalación (`install.sh` / `uninstall.sh`), servicio `systemd --user` y lanzador `.desktop`[cite: 2, 7].
+* **Pruebas:** `pytest` (mínimo 10 pruebas unitarias sobre la lógica financiera y de negocio)[cite: 2, 13].
+
+# ARQUITECTURA DE DOS COMPONENTES (FRONTEND + BACKEND DEMONIO)
+Debes dividir el proyecto en una arquitectura modular en capas (Presentación, Lógica de Negocio, Acceso a Datos y Demonio en Segundo Plano)[cite: 6, 7]:
+
+1. **Frontend (`prestamos-gui`):** Aplicación de escritorio en PySide6[cite: 13]. Debe perusar hilos de trabajo (`QThread` / `threading` con `Lock` y `Queue`) para operaciones pesadas (generación de PDFs de +500 registros, cálculos de cartera y respaldos) para evitar que la interfaz se congele[cite: 2, 7].
+2. **Backend Demonio (`prestamos-daemon`):** Proceso independiente gestionado por `systemd --user`[cite: 7]. Se encarga de monitorear vencimientos próximos (alertas mediante `libnotify` cada N días configurables)[cite: 5] y ejecutar respaldos automáticos programados mediante temporizadores (`systemd .timer` o hilo planificador)[cite: 6, 7].
+3. **Comunicación entre Procesos (IPC):** Implementa un **Socket Unix** (`~/.local/share/gestion_prestamos/ipc.sock`)[cite: 1, 2, 7]. La GUI debe poder enviar comandos al demonio (ej. `FORZAR_RESPALDO`, `VERIFICAR_ALERTAS`, `ESTADO_DEMONIO`) y recibir respuestas en tiempo real en formato JSON.
+
+# REQUERIMIENTOS DE SISTEMAS OPERATIVOS (OBLIGATORIOS)
+* **Estándar XDG y Permisos (SO-05):**[cite: 2]
+  * Configuración en `~/.config/gestion_prestamos/config.json` (permisos `600`, directorio `700`)[cite: 2].
+  * Base de datos, respaldos y logs en `~/.local/share/gestion_prestamos/` (permisos `700` para directorios y `600` para la base de datos SQLite y respaldos)[cite: 2, 7].
+* **Manejo de Señales POSIX (SO-04):**[cite: 2]
+  * Ambos procesos (GUI y Demonio) deben capturar `SIGTERM` y `SIGINT` para cerrar transacciones activas de SQLite, liberar bloqueos `flock` y cerrar el socket Unix ordenadamente sin corromper datos[cite: 2, 7].
+  * Capturar `SIGHUP` para recargar dinámicamente el archivo `config.json` sin reiniciar la aplicación[cite: 2].
+* **Logs y Rotación (SO-06):** Implementar `logging.handlers.RotatingFileHandler` con niveles `INFO`, `WARNING` y `ERROR`[cite: 2].
+* **Tolerancia a Fallos de Sistema de Archivos (SO-10):** Capturar explícitamente excepciones de disco lleno (`ENOSPC`), permisos denegados (`EACCES`) o archivos inexistentes (`ENOENT`) mostrando alertas claras en la UI sin que el programa colapse[cite: 2].
+
+# REQUERIMIENTOS FUNCIONALES DEL SISTEMA DE PRÉSTAMOS
+1. **Usuarios y Seguridad (PR-01, PR-02):** Login con contraseñas hasheadas con `bcrypt` o `argon2`[cite: 3]. Roles: `Administrador` (acceso total y configuración) y `Cajero` (gestión de clientes, préstamos y pagos; sin acceso a configuración ni restauración)[cite: 3].
+2. **Clientes (PR-03 a PR-06):** CRUD completo con desactivación lógica[cite: 3]. Campos: tipo y número de documento (único), nombres, apellidos, fecha de nacimiento, teléfono, correo, dirección, ocupación e ingresos mensuales[cite: 3]. Validación estricta con expresiones regulares y listado paginado con búsqueda por nombre o documento[cite: 4].
+3. **Préstamos y Simulador (PR-07 a PR-12):**[cite: 4]
+   * Asociar a cliente: monto, tasa de interés (anual o mensual), número de cuotas, periodicidad (semanal, quincenal, mensual) y fecha de desembolso[cite: 4].
+   * **Métodos de amortización:** Sistema Francés (cuota fija) y Sistema Alemán (abono constante a capital + interés sobre saldo)[cite: 4].
+   * **Simulador:** Vista previa que calcule cuota, total de intereses y total a pagar sin guardar en BD[cite: 4].
+   * Comisiones/seguros opcionales (porcentaje o valor fijo)[cite: 4].
+   * Bloquear nuevos préstamos si el cliente supera el umbral configurable de días en mora[cite: 4].
+   * Estados: `simulado`, `activo`, `en_mora`, `cancelado`, `castigado`[cite: 4].
+4. **Calendario y Amortización (PR-13 a PR-16):**[cite: 4, 5]
+   * Tabla con número de cuota, fecha de vencimiento, capital, interés, cuota total y saldo[cite: 4].
+   * Ajuste automático de fechas de vencimiento si caen en fines de semana o días feriados configurables[cite: 5].
+   * Widget visual de calendario (`QCalendarWidget`) resaltando con colores fechas pendientes, pagadas y vencidas[cite: 5].
+5. **Pagos y Mora (PR-17 a PR-20):**[cite: 5]
+   * Registro de pagos totales, parciales o adelantados (fecha, monto, método)[cite: 5].
+   * Prelación de pagos estricta: 1° Mora -> 2° Interés -> 3° Capital, recalculando saldos[cite: 5].
+   * Cálculo de interés moratorio diario según tasa configurable[cite: 5].
+6. **Reportes PDF y CSV (PR-21 a PR-24):**[cite: 5, 6]
+   * Generar PDFs con encabezado (logotipo de la entidad, fecha de emisión, usuario que lo genera y paginación)[cite: 6]: contrato/resumen del préstamo, tabla de amortización, estado de cuenta del cliente, comprobante de pago[cite: 6] y reportes gerenciales (cartera vigente, cartera en mora, recaudo por fechas, intereses proyectados)[cite: 6]. Opción de exportar tablas a CSV[cite: 6].
+7. **Configuración y Respaldo (PR-25, PR-26):** Parámetros editables (moneda, tasa máxima, tasa de mora, días umbral de mora, feriados, nombre/NIT de la entidad)[cite: 4, 6]. Respaldo y restauración manual y automática de la BD SQLite[cite: 6].
+
+# ESTRUCTURA DEL REPOSITORIO Y ENTREGABLES QUE DEBES GENERAR
+Genera el código completo, funcional y listo para ejecutar siguiendo esta estructura de directorios:
+
+```text
+proyecto_prestamos/
+├── README.md                    # Guía de arquitectura, uso y comandos de prueba SO
+├── requirements.txt             # PySide6, reportlab, bcrypt, pytest
+├── setup/
+│   ├── install.sh               # Crea venv, instala dependencias, copia .desktop, icono y habilita systemd --user
+│   ├── uninstall.sh             # Detiene servicios y limpia archivos de instalación
+│   ├── gestion-prestamos.desktop
+│   └── prestamos-daemon.service # Archivo unit de systemd --user
+├── src/
+│   ├── common/
+│   │   ├── config.py            # Gestión XDG, permisos 600/700 y recarga SIGHUP
+│   │   ├── logger.py            # RotatingFileHandler
+│   │   ├── signals.py           # Manejadores SIGTERM, SIGINT, SIGHUP
+│   │   └── ipc_protocol.py      # Cliente/Servidor Socket Unix
+│   ├── database/
+│   │   ├── db_manager.py        # Conexión SQLite, flock, manejo errores FS (SO-10)
+│   │   └── models.py            # Creación de tablas e índices + usuario admin por defecto
+│   ├── business/
+│   │   ├── auth_service.py      # Login y hashing bcrypt
+│   │   ├── client_service.py    # Validaciones y CRUD clientes
+│   │   ├── loan_calculator.py   # Lógica financiera exacta con Decimal (Francés, Alemán, Mora, Feriados)
+│   │   ├── payment_service.py   # Transacciones de pago (Mora -> Interés -> Capital)
+│   │   └── pdf_generator.py     # Generación de reportes y comprobantes en hilos secundarios
+│   ├── daemon/
+│   │   └── daemon_main.py       # Proceso demonio: servidor Socket Unix, alertas libnotify y respaldos
+│   └── gui/
+│       ├── main_window.py       # Ventana principal, control de roles y monitoreo del demonio
+│       ├── login_dialog.py
+│       ├── clients_view.py
+│       ├── loans_view.py        # Incluye simulador y QCalendarWidget
+│       ├── payments_view.py
+│       ├── reports_view.py
+│       └── settings_view.py
+└── tests/
+    └── test_business_logic.py   # Mínimo 12 pruebas unitarias con pytest (incluyendo caso aceptación: 10.000.000 al 18% anual a 12 meses método francés)
+
+
+---
+
+# ANEXO: REGISTRO DE PETICIONES Y CAMBIOS DEL PROYECTO
+
+### Registro 01: Petición Inicial
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "Quiiero, que utilices ell promt que está el dicumento que se llama promt, y que todos los cambiios quee reallices o todas las peticiones que yo te haga la anexes, tambien puedes utilizar superpower para la reallización del proyecto"
+- **Acciones / Cambios Realizados:**
+  1. Inicialización y análisis completo del documento maestro de especificaciones (`promt`).
+  2. Creación de la estructura del proyecto en `proyecto_prestamos/` conforme a la especificación de Sistemas Operativos y Linux nativo (Ubuntu 22.04/24.04 LTS y Debian 12).
+  3. Implementación de todos los módulos del sistema:
+     - Configuración XDG, permisos 600/700, logging rotativo con `RotatingFileHandler`, IPC Unix Socket y señales POSIX (`SIGTERM`, `SIGINT`, `SIGHUP`).
+     - Base de datos SQLite3 con concurrencia `fcntl.flock`, manejo robusto de errores de FS (`ENOSPC`, `EACCES`, `ENOENT`), modelos relacionales e índices.
+     - Lógica de negocio y financiera de alta precisión con `decimal.Decimal`: amortización Francesa y Alemana, ajuste de feriados/fines de semana, control de mora, prelación de pagos (Mora -> Interés -> Capital), validaciones y generación de reportes PDF con ReportLab y CSV.
+     - Demonio en segundo plano (`prestamos-daemon`) con servidor IPC Unix Socket, notificaciones `libnotify` y respaldos automáticos.
+     - Interfaz gráfica PySide6 (`prestamos-gui`) con hilos `QThread` para tareas pesadas, vistas modulares (Login, Clientes, Préstamos y Simulador, Pagos, Reportes y Ajustes/Respaldos) y widget de calendario.
+     - Scripts de instalación/desinstalación (`install.sh`, `uninstall.sh`), servicio `systemd --user`, archivo `.desktop` y suite de pruebas `pytest` exhaustiva (mínimo 12 pruebas unitarias).
+  4. Lista de Entregables Generados:
+     - `proyecto_prestamos/requirements.txt`
+     - `proyecto_prestamos/README.md`
+     - `proyecto_prestamos/setup/install.sh`
+     - `proyecto_prestamos/setup/uninstall.sh`
+     - `proyecto_prestamos/setup/gestion-prestamos.desktop`
+     - `proyecto_prestamos/setup/prestamos-daemon.service`
+     - `proyecto_prestamos/src/common/config.py`
+     - `proyecto_prestamos/src/common/logger.py`
+     - `proyecto_prestamos/src/common/signals.py`
+     - `proyecto_prestamos/src/common/ipc_protocol.py`
+     - `proyecto_prestamos/src/database/db_manager.py`
+     - `proyecto_prestamos/src/database/models.py`
+     - `proyecto_prestamos/src/business/auth_service.py`
+     - `proyecto_prestamos/src/business/client_service.py`
+     - `proyecto_prestamos/src/business/loan_calculator.py`
+     - `proyecto_prestamos/src/business/payment_service.py`
+     - `proyecto_prestamos/src/business/pdf_generator.py`
+     - `proyecto_prestamos/src/daemon/daemon_main.py`
+     - `proyecto_prestamos/src/gui/main_window.py`
+     - `proyecto_prestamos/src/gui/login_dialog.py`
+     - `proyecto_prestamos/src/gui/clients_view.py`
+     - `proyecto_prestamos/src/gui/loans_view.py`
+     - `proyecto_prestamos/src/gui/payments_view.py`
+     - `proyecto_prestamos/src/gui/reports_view.py`
+     - `proyecto_prestamos/src/gui/settings_view.py`
+     - `proyecto_prestamos/tests/test_business_logic.py`
+     - `proyecto_prestamos/prestamos_gui_app.py`
+     - `proyecto_prestamos/prestamos_daemon_app.py`
+
+
+---
+
+### Registro 02: Consulta de Visualización y Ejecución
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "y cómoo dondde puedo ver el sistema de como quedó,"
+- **Acciones / Explicación Registrada:**
+  1. Se explicó cómo ejecutar la aplicación de escritorio nativa en Windows (`python prestamos_gui_app.py`) instalando las dependencias de `requirements.txt`.
+  2. Se detalló la ejecución en Linux / WSL (Ubuntu/Debian) usando el script automatizado `./setup/install.sh` y el lanzador `prestamos-gui` para validar el entorno completo con `systemd --user` y socket Unix.
+  3. Se construyó una vista previa interactiva standalone (Artefacto HTML) con el flujo de trabajo de la interfaz PySide6 (Login, Clientes, Simulador Francés/Alemán, Calendario de Cuotas, Pagos con Prelación y Control del Demonio) para visualización inmediata.
+
+
+---
+
+### Registro 03: Diagnóstico y Solución Error Terminal Windows ('pip no se reconoce')
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "esto es lo que me aparece en lla terminal" (Imagen mostrando el error: `pip : El término 'pip' no se reconoce como nombre de un cmdlet...`)
+- **Causa Raíz:**
+  El comando `pip` y `python` no están agregados a la variable de entorno `PATH` de la sesión de Windows PowerShell. Sin embargo, en el equipo se encuentran instaladas dos distribuciones de Python:
+  1. Python 3.13 dentro de Laragon: `C:\laragon\bin\python\python-3.13`
+  2. Python 3.14 en AppData: `C:\Users\Luis Angel\AppData\Local\Programs\Python\Python314`
+- **Acciones / Solución Provista:**
+  1. Proveer los comandos para agregar la ruta al PATH en PowerShell.
+  2. Ofrecer la opción directa y recomendada de abrir la **Terminal de Laragon** (la cual ya configura automáticamente Python y pip en PATH).
+  3. Proveer la ejecución directa invocando los binarios con su ruta absoluta.
+
+
+---
+
+### Registro 04: Recomendación de Uso de Terminal de Laragon
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "y no es mejor si hago el comando en la terminal de laragon"
+- **Acciones / Confirmación Registrada:**
+  Se confirmó que la **Terminal de Laragon** es la opción recomendada y óptima en este entorno porque:
+  1. Ya carga de manera nativa e integrada las rutas de `python` y `pip` en su variable de entorno `PATH`.
+  2. Inicia directamente posicionado en el directorio `C:\laragon\www\`.
+  3. Evita conflictos con ejecutables del sistema operativo Windows y no requiere configurar variables globales manualmente.
+  4. Instrucciones específicas provistas: `cd gestion_de_prestamos/proyecto_prestamos`, seguido de `pip install -r requirements.txt` y `python prestamos_gui_app.py`.
+
+
+---
+
+### Registro 05: Ajustes de Visibilidad de Tipografía, Modo Día/Noche y Corrección en Creación de Clientes
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "el proyect esta sbien solo quiero que le cambies unas cosas como por ejemplo el color de las letras es que no se ve lo que uno está escribiendo, tambien uiqiero que le cambies y le des lla opción de cambiarle el color osea de dia o de noche y que este si deje ver las letras, tambien quiero que deje agregar un nuevo cliente ya que no lo deja"
+- **Acciones / Cambios Realizados:**
+  1. **Contraste y Visibilidad de Letras:** Se forzó explícitamente en todas las hojas de estilo (QSS) los colores de texto y fondo para todos los controles de entrada (`QLineEdit`, `QSpinBox`, `QDoubleSpinBox`, `QComboBox`, `QDateEdit`, `QTextEdit`). Esto garantiza que el texto sea 100% visible y legible mientras el usuario escribe, evitando colisiones con el tema por defecto de Windows o Qt.
+  2. **Selector de Tema Día / Noche (Modo Claro / Modo Oscuro):**
+     - Se implementó un gestor de temas dinámico (`theme_manager.py`) que permite alternar con un solo clic entre "☀️ Modo Día" (fondos claros, tarjetas blancas, texto oscuro de alto contraste `#0F172A`) y "🌙 Modo Noche" (paleta oscura moderna `#0B0F19`/`#1E293B`, texto brillante `#F8FAFC`).
+     - Se añadió un botón de alternancia en la barra lateral de la ventana principal.
+     - Se persiste la preferencia del usuario en `config.json`.
+  3. **Corrección y Optimización en Creación de Clientes:**
+     - En `ClientFormDialog`, se reemplazó la validación posterior al cierre por validación previa: si hay un error, el diálogo permanece abierto y preserva todos los datos ingresados por el usuario.
+     - Se implementó `QDateEdit` con selector de calendario para la fecha de nacimiento (evitando errores manuales de formato AAAA-MM-DD).
+     - Se flexibilizó y aseguró la validación de teléfono, documento y correo con mensajes de error claros e instructivos en español.
+
+
+---
+
+### Registro 06: Instrucciones para Refrescar y Visualizar Cambios
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "y como hago yo para poder ver los cambios porque no se ha actualizado"
+- **Acciones / Explicación Registrada:**
+  1. Se purgó la caché de archivos binarios compilados de Python (`__pycache__`) en todo el proyecto para garantizar la carga del código nuevo.
+  2. Se explicó que en aplicaciones de escritorio de Python (PySide6) los cambios de código no se actualizan en caliente en una ventana ya abierta: es necesario cerrar la ventana anterior (o presionar `Ctrl + C` en la terminal) y volver a ejecutar `python prestamos_gui_app.py`.
+  3. Se detalló que para la vista previa web en el navegador, se debe presionar `Ctrl + F5` para forzar la recarga sin caché.
+
+
+---
+
+### Registro 07: Visualización Simultánea de Ventanas (Administrador y Cajero)
+- **Fecha:** 2026-11-20
+- **Petición del Usuario:**
+  > "y como hago para ver las dos ventanas al tiempo, oosea para poder ver una venrtana el panell de administrador y en otra el de cajero"
+- **Acciones / Implementación Realizada:**
+  1. Se implementó el script lanzador automatizado `lanzar_dual.py` en `proyecto_prestamos/`. Este script arranca una sola aplicación que despliega ambas ventanas simultáneas (Administrador y Cajero) posicionándolas automáticamente al 50% de la pantalla (lado a lado), permitiendo verificar en vivo el aislamiento de permisos y la concurrencia en SQLite.
+  2. Se explicó la alternativa manual de abrir dos terminales independientes y autenticarse con cada usuario (`admin` y `cajero`).
+  3. Se actualizó la vista previa web (`vista_previa_sistema.html`) con un modo de comparación en pantalla dividida para inspección visual inmediata.
+
+
+---
+
+### Registro 08: Reorganización y Separación Arquitectónica en Backend y Frontend
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "hola, quiero que al proyecto le agregues el orden y llo separes por ejemplo le hagas el backend y el frontend para un mejor orden del proyecto,"
+- **Acciones / Cambios Realizados:**
+  1. Se reestructuró la arquitectura del proyecto separando claramente las responsabilidades en dos paquetes principales:
+     - **`backend/`:** Agrupa la lógica de negocio (`business/`), acceso a datos SQLite con `fcntl.flock` (`database/`), el demonio en segundo plano con Socket Unix y `libnotify` (`daemon/`) y los servicios comunes de SO como configuración XDG y señales POSIX (`common/`).
+     - **`frontend/`:** Agrupa la interfaz gráfica PySide6 (`gui/`) con todas las vistas (Login, Clientes, Préstamos, Pagos, Reportes, Configuración) y el gestor de temas (`theme_manager.py`).
+  2. Se actualizaron los puntos de entrada (`prestamos_gui_app.py`, `prestamos_daemon_app.py`, `lanzar_dual.py`), las pruebas (`tests/test_business_logic.py`) y la documentación técnica en `README.md`.
+  3. Se crearon módulos puente de retrocompatibilidad en `src/` para garantizar que cualquier referencia previa siga funcionando sin roturas.
+
+
+---
+
+### Registro 09: Creación de la Guía Pedagógica y Técnica para Sustentación ante el Docente
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "hola, quiero que me digas como es que finciona el proyecto o commo hiciste para quee este funcionara y que le pueda explicar al profesor que funcion cumple laragon en el proyecto, tambien dime la funcion de las carpetas, esto lo haces en un archivo y siempre que cambie algo cambias el consepto agregando los cambios que le hayamos realizado"
+- **Acciones / Entregables Generados:**
+  1. Se creó el documento maestro `GUIA_EXPLICACION_PROYECTO.md` en la raíz del proyecto.
+  2. Se redactó la explicación técnica detallada de cómo funciona el sistema, los mecanismos de Sistemas Operativos empleados (IPC Unix Socket, concurrencia `fcntl.flock`, señales POSIX, multihilo `QThread`, XDG 600/700, demonio systemd, libnotify y precisión financiera con `decimal.Decimal`).
+  3. Se aclaró rigurosamente el rol de **Laragon**: actúa exclusivamente como suite/entorno de ejecución de Python en Windows y terminal configurada, desmintiendo que se utilice Apache, MySQL o PHP de Laragon (el software es nativo Python/Qt/SQLite/systemd).
+  4. Se documentó el propósito y contenido de cada directorio del proyecto (`frontend/`, `backend/`, `setup/`, `tests/`, `src/`).
+  5. Se estableció la sección de mantenimiento evolutivo para registrar futuros conceptos y cambios.
+
+
+---
+
+### Registro 10: Concepto y Función del Demonio (Daemon) en el Backend
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "y que significa el demonio en el backend"
+- **Acciones / Explicación Registrada:**
+  1. Se incorporó en `GUIA_EXPLICACION_PROYECTO.md` la definición formal de qué es un demonio en Sistemas Operativos y su rol específico en este proyecto (`prestamos-daemon`).
+  2. Se detallaron las 4 tareas autónomas del demonio:
+     - Ejecución desatendida en segundo plano administrada por `systemd --user`.
+     - Monitoreo continuo de cuotas vencidas y emisión de notificaciones de escritorio con `libnotify`.
+     - Planificación y rotación automática de copias de seguridad de la base de datos SQLite.
+     - Servidor de escucha IPC mediante Socket Unix (`ipc.sock`) para responder a comandos de la GUI.
+
+
+---
+
+### Registro 11: Corrección de Contraste y Visibilidad en Módulo de Pagos y Cobranzas
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "en ewll modulo de pagos y cogranzas este tiene untexto que no se ve nada de lo que tiene escrito, entonces quiero que lo arregles"
+- **Causa Raíz Identificada:**
+  La tarjeta de desglose de deuda exigible (`lbl_debt_info`) en el panel de Pagos tenía configurado un fondo ámbar claro (`#FEF3C7`) pero sin color de fuente explícito, lo que provocaba que en modo oscuro o bajo la paleta por defecto de Qt/Windows el texto se renderizara en blanco sobre fondo claro, resultando totalmente invisible.
+- **Acciones / Cambios Realizados:**
+  1. Se actualizó el estilo de `lbl_debt_info` en `frontend/gui/payments_view.py` forzando texto de alto contraste (`color: #78350F !important;`) con borde delimitador (`border: 1.5px solid #F59E0B;`), fondo acolchado y tipografía clara.
+  2. Se formateó el desglose dinámico en HTML con colores nítidos para mora, intereses, capital y total exigible.
+  3. Se aplicó la misma corrección preventiva en el panel de préstamos (`loans_view.py`) para la tarjeta de resumen de simulación (`lbl_sim_summary`), garantizando legibilidad total en cualquier modo.
+  4. Se purgó la caché de compilación `__pycache__` para aplicar la actualización inmediatamente al reiniciar el script.
+
+
+---
+
+### Registro 12: Diagnóstico y Solución de Ejecución en Windows PowerShell (Fallo de Comando pip / python)
+- **Fecha:** 2026-11-23
+- **Captura / Situación Reportada por el Usuario:**
+  Captura de pantalla de Windows PowerShell mostrando:
+  `pip : El término 'pip' no se reconoce como nombre de un cmdlet, función, archivo de script o programa ejecutable...`
+  al intentar ejecutar `pip install -r requirements.txt` y `python prestamos_gui_app.py`.
+- **Causa Raíz Identificada:**
+  1. En el sistema operativo Windows, el ejecutable global de PowerShell no tiene añadidas las variables de entorno de Python, o apunta al alias vacío de Microsoft Store (`WindowsApps\python.exe`).
+  2. El entorno Python con todas las dependencias necesarias (`PySide6`, `bcrypt`, `reportlab`, `pytest`, `pillow`, etc.) está instalado de manera aislada y completa dentro de la carpeta de Laragon en: `C:\laragon\bin\python\python-3.13`.
+  3. Por ende, todas las librerías ya están instaladas y funcionales en dicho Python, pero invocar `pip` o `python` a secas en PowerShell nativo fuera de Laragon genera el error de comando no reconocido.
+- **Acciones / Soluciones Implementadas:**
+  1. Se verificó que todas las dependencias del proyecto (`PySide6 6.12.0`, `bcrypt 5.0.0`, `reportlab 5.1.0`) ya se encuentran 100% instaladas y operativas en `C:\laragon\bin\python\python-3.13`.
+  2. Se crearon scripts automáticos de ejecución por doble clic `ejecutar.bat` tanto en la raíz como en `proyecto_prestamos/`, que detectan automáticamente el ejecutable de Laragon y arrancan la aplicación sin requerir configuración manual de variables de entorno.
+  3. Se instruyó al usuario sobre las tres alternativas de ejecución:
+     - **Opción recomendada:** Abrir la Terminal integrada de Laragon (donde las variables de entorno ya están precargadas).
+     - **Opción script:** Hacer doble clic en `ejecutar.bat`.
+     - **Opción PowerShell:** Ejecutar invocando directamente la ruta absoluta del binario: `& "C:\laragon\bin\python\python-3.13\python.exe" prestamos_gui_app.py`.
+
+
+---
+
+### Registro 13: Inicialización del Repositorio Git y Preparación para Despliegue en Railway Cloud
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "quiero que lo subas a un repositorio en git y luego despliegues en railway"
+- **Acciones / Preparativos Implementados:**
+  1. **Configuración de Control de Versiones Git:**
+     - Creación de `.gitignore` corporativo para omitir sockets temporales (`ipc.sock`), bases de datos SQLite locales (`*.db`, `*.sqlite3`), archivos compilados (`__pycache__`, `*.pyc`), logs y entornos virtuales.
+     - Inicialización formal del repositorio local Git (`git init`).
+     - Preparación y staging de toda la base de código desacoplada (`frontend/`, `backend/`, `tests/`, `setup/`, documentación y scripts de ejecución).
+  2. **Adaptación y Despliegue Cloud para Railway:**
+     - Como las aplicaciones con interfaz gráfica nativa de escritorio (PySide6 / Qt) operan en estaciones de trabajo y Railway es una plataforma de servicios en la nube en contenedores Linux sin servidor X11, se implementó un servicio web puente `web_app.py`.
+     - `web_app.py` expone el estado del backend, verificación de salud (`/health`), información de arquitectura de Sistemas Operativos (`/api/status`) y el simulador financiero interactivo de amortizaciones, escuchando en el puerto dinámico `$PORT` provisto por Railway.
+     - Se crearon los descriptores de despliegue `Procfile` y `railway.json` con configuración de Nixpacks y política de reinicio automático ante fallos.
+  3. **Cometido Inicial:**
+     - Generación del commit inicial en la rama `main` listo para sincronizarse con GitHub / Railway.

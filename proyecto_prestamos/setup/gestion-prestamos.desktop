@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Gestión de Préstamos
+GenericName=Sistema Financiero de Préstamos
+Comment=Gestión integral de clientes, préstamos, amortizaciones y pagos
+Exec=@BIN_PATH@
+Icon=accessories-calculator
+Terminal=false
+Categories=Office;Finance;Qt;
+Keywords=prestamos;creditos;finanzas;amortizacion;
+StartupNotify=true
+

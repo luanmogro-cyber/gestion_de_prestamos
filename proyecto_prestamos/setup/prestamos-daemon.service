@@ -1,0 +1,17 @@
+[Unit]
+Description=Demonio de Monitoreo y Respaldos del Sistema de Préstamos
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=@DAEMON_PATH@
+Restart=on-failure
+RestartSec=5s
+KillSignal=SIGTERM
+TimeoutStopSec=10s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+

@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases and Sockets
+*.db
+*.db-journal
+*.db-wal
+*.sqlite3
+*.lock
+*.sock
+ipc.sock
+
+# Logs and runtime files
+*.log
+logs/
+.tmp/
+tmp/
+
+# OS specific
+.DS_Store
+Thumbs.db
