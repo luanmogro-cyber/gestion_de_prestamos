@@ -391,3 +391,15 @@ proyecto_prestamos/
 - **Acciones Implementadas:**
   1. Se inició la inspección del estado de sesión en GitHub para determinar el nombre de usuario activo exacto.
   2. Se preparó la guía paso a paso para que el usuario confirme la creación del repositorio desde el botón verde de GitHub o proporcione la URL exacta si tiene otro nombre.
+
+
+---
+
+### Registro 19: Éxito en Sincronización con GitHub y Despliegue Activo en Railway Cloud
+- **Fecha:** 2026-11-23
+- **Petición del Usuario:**
+  > "ya ahoora si ya está llisto y dime cual es el comando para poder ver la aplicacion así como antes desde la terminal"
+- **Acciones / Operaciones Realizadas:**
+  1. **Subida a GitHub:** Se ejecutó con éxito `git push -u origin main` hacia `https://github.com/luanmogro-cyber/gestion_de_prestamos.git`, subiendo todo el código fuente desacoplado, tests, scripts de ejecución y documentación.
+  2. **Conexión y Despliegue en Railway:** Se vinculó el repositorio `luanmogro-cyber/gestion_de_prestamos@main` al servicio `gestion_de_prestamos` (ID: `49d85d9c-3157-4509-8df7-ffee5908ef8c`) del proyecto `gestion_de_prestamos` en Railway Cloud. Se inició de forma autónoma la primera compilación y despliegue (Deployment ID: `cde1f0b0-544c-42e5-b2ff-e34bc9715df5`).
+  3. **Comandos de Ejecución Local:** Se detallaron los comandos oficiales para lanzar la aplicación gráfica desde la terminal integrada de Laragon y PowerShell tanto en modo simple como en modo dual.

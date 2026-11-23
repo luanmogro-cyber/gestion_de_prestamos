@@ -205,6 +205,7 @@ Este apartado recopila todos los cambios y mejoras incorporadas cronológicament
 | **16** | 2026-11-23 | Diagnóstico de autenticación interactiva de Git y conexión Railway. | Identificación de requerimiento de autorización de Git Credential Manager en Windows para el primer push interactivo hacia GitHub. |
 | **17** | 2026-11-23 | Selección de Credential Helper para Git en Windows. | Guía para seleccionar `manager` (Git Credential Manager) y recordar la preferencia para autorizar la sincronización con GitHub. |
 | **18** | 2026-11-23 | Diagnóstico de existencia de repositorio en GitHub (`Repository not found`). | Verificación técnica de la existencia física del repositorio `gestion_de_prestamos` e identificación de usuario en GitHub. |
+| **19** | 2026-11-23 | Éxito en sincronización con GitHub y despliegue activo en Railway Cloud. | Push completo a `luanmogro-cyber/gestion_de_prestamos@main` y despliegue automático del servicio en Railway con URL pública HTTPS. |
 
 ---
 
