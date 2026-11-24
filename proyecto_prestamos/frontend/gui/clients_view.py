@@ -117,7 +117,7 @@ class ClientFormDialog(QDialog):
         btn_layout.addWidget(btn_cancel)
 
         btn_save = QPushButton("💾 Guardar Cliente")
-        btn_save.setStyleSheet("background-color: #2563EB; color: white; font-weight: bold; padding: 8px 20px;")
+        btn_save.setStyleSheet("background-color: #1D4ED8; color: white; font-weight: bold; padding: 8px 20px; border-radius: 6px;")
         btn_save.clicked.connect(self._validate_and_accept)
         btn_layout.addWidget(btn_save)
 
@@ -173,7 +173,7 @@ class ClientsView(QWidget):
         # Encabezado y barra de búsqueda
         top_bar = QHBoxLayout()
         title = QLabel("Gestión de Clientes")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #1E3A8A;")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0F2942;")
         top_bar.addWidget(title)
 
         top_bar.addStretch()
@@ -185,7 +185,7 @@ class ClientsView(QWidget):
         top_bar.addWidget(self.txt_search)
 
         btn_new = QPushButton("➕ Nuevo Cliente")
-        btn_new.setStyleSheet("background-color: #10B981; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px;")
+        btn_new.setStyleSheet("background-color: #059669; color: white; font-weight: bold; padding: 8px 16px; border-radius: 6px;")
         btn_new.clicked.connect(self._create_client)
         top_bar.addWidget(btn_new)
 

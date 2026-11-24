@@ -32,7 +32,7 @@ class SettingsView(QWidget):
         layout.setSpacing(12)
 
         title = QLabel("Configuración del Sistema y Respaldos (SO-05)")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #1E3A8A;")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0F2942;")
         layout.addWidget(title)
 
         is_admin = self.current_user.get("role") == "Administrador"

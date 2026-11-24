@@ -99,12 +99,16 @@ class MainWindow(QMainWindow):
         side_layout.setContentsMargins(0, 15, 0, 15)
         side_layout.setSpacing(6)
 
-        # Logo / Título institucional
-        lbl_app = QLabel("Créditos Linux")
-        lbl_app.setStyleSheet("color: #FFFFFF; font-size: 19px; font-weight: bold; padding: 10px 16px 2px 16px;")
+        # Logo / Título institucional financiero
+        lbl_app = QLabel("🏦 Gestión de Préstamos")
+        lbl_app.setStyleSheet("color: #FFFFFF; font-size: 16px; font-weight: bold; padding: 12px 16px 2px 16px;")
         side_layout.addWidget(lbl_app)
 
-        lbl_role = QLabel(f"● {self.current_user['role']}\n{self.current_user['full_name']}")
+        lbl_sub_brand = QLabel("Plataforma Financiera & Créditos")
+        lbl_sub_brand.setStyleSheet("color: #38BDF8; font-size: 10px; font-weight: 600; padding: 0 16px 8px 16px;")
+        side_layout.addWidget(lbl_sub_brand)
+
+        lbl_role = QLabel(f"● {self.current_user['role']} | {self.current_user['full_name']}")
         lbl_role.setStyleSheet("color: #94A3B8; font-size: 11px; padding: 0 16px 12px 16px;")
         side_layout.addWidget(lbl_role)
 

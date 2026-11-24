@@ -55,7 +55,7 @@ class ReportsView(QWidget):
         layout.setSpacing(15)
 
         title = QLabel("Reportes Gerenciales y Exportación")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #1E3A8A;")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #0F2942;")
         layout.addWidget(title)
 
         box = QGroupBox("Seleccione el Tipo de Reporte a Generar")
@@ -81,12 +81,12 @@ class ReportsView(QWidget):
         btn_layout = QHBoxLayout()
 
         self.btn_pdf = QPushButton("📄 Generar Reporte PDF (en segundo plano)")
-        self.btn_pdf.setStyleSheet("background-color: #DC2626; color: white; font-weight: bold; padding: 10px 18px; border-radius: 4px;")
+        self.btn_pdf.setStyleSheet("background-color: #1D4ED8; color: white; font-weight: bold; padding: 10px 18px; border-radius: 6px;")
         self.btn_pdf.clicked.connect(self._start_pdf_generation)
         btn_layout.addWidget(self.btn_pdf)
 
         self.btn_csv = QPushButton("📊 Exportar Datos a CSV")
-        self.btn_csv.setStyleSheet("background-color: #059669; color: white; font-weight: bold; padding: 10px 18px; border-radius: 4px;")
+        self.btn_csv.setStyleSheet("background-color: #059669; color: white; font-weight: bold; padding: 10px 18px; border-radius: 6px;")
         self.btn_csv.clicked.connect(self._export_csv)
         btn_layout.addWidget(self.btn_csv)
 

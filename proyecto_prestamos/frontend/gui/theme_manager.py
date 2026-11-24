@@ -1,55 +1,68 @@
 """
-Gestor de Temas (Modo Día / Modo Noche) para la aplicación PySide6.
-Garantiza contraste óptimo y visibilidad absoluta de tipografías en todos los campos de entrada.
+Gestor de Temas y Paleta de Colores de Entidades Financieras para PySide6.
+Diseñado bajo estándares corporativos y fintech:
+- Paleta Institucional: Azul Marino Profundo (Confianza), Verde Esmeralda (Liquidez / Pagos), Ámbar Oro (Intereses / Pendientes) y Rojo Carmesí (Riesgo / Mora).
+- Tipografía Ejecutiva: Familia Sans-Serif clara, legible y con alta legibilidad en números y montos monetarios.
+- Soporte para Modo Día y Modo Noche dinámico con contraste óptimo en ambos esquemas.
 """
 
 def get_theme_stylesheet(theme: str = "claro") -> str:
     is_dark = (theme.lower() == "oscuro")
 
     if is_dark:
-        # Paleta Modo Noche (Dark)
-        bg_main = "#0B0F19"
-        bg_surface = "#151E2E"
-        bg_input = "#1E293B"
-        border_input = "#475569"
-        border_focus = "#3B82F6"
-        text_primary = "#F8FAFC"
-        text_secondary = "#94A3B8"
-        table_alt = "#1E293B"
-        table_grid = "#334155"
-        sidebar_bg = "#0A0D14"
-        card_bg = "#151E2E"
-        status_bg = "#0F172A"
-        status_border = "#1E293B"
+        # ==========================================
+        # PALETA MODO NOCHE (Executive Dark Fintech)
+        # ==========================================
+        bg_main = "#0B1120"          # Midnight Navy profundo
+        bg_surface = "#111827"       # Superficie de tarjetas
+        bg_input = "#1F2937"         # Fondo de campos de entrada
+        border_input = "#374151"     # Borde neutro
+        border_focus = "#3B82F6"     # Azul brillante al enfocar
+        text_primary = "#F9FAFB"     # Blanco limpio de alto contraste
+        text_secondary = "#9CA3AF"   # Gris medio para subtítulos
+        table_alt = "#162032"        # Filas alternas
+        table_grid = "#1F2937"       # Rejilla suave
+        sidebar_bg = "#070D18"       # Barra lateral oscura ejecutiva
+        card_bg = "#111827"          # Tarjeta financiera
+        status_bg = "#070D18"
+        status_border = "#1F2937"
+        header_bg = "#0F2942"        # Encabezados de tabla en Azul Marino
+        header_border = "#1E3A8A"
     else:
-        # Paleta Modo Día (Light)
-        bg_main = "#F8FAFC"
-        bg_surface = "#FFFFFF"
-        bg_input = "#FFFFFF"
-        border_input = "#CBD5E1"
-        border_focus = "#2563EB"
-        text_primary = "#0F172A"
-        text_secondary = "#475569"
-        table_alt = "#F1F5F9"
-        table_grid = "#E2E8F0"
-        sidebar_bg = "#0F172A"
-        card_bg = "#FFFFFF"
+        # ==========================================
+        # PALETA MODO DÍA (Corporate Light Banking)
+        # ==========================================
+        bg_main = "#F8FAFC"          # Slate gris blanquecino limpio
+        bg_surface = "#FFFFFF"       # Superficie blanca pura
+        bg_input = "#FFFFFF"         # Fondo blanco para escritura
+        border_input = "#CBD5E1"     # Borde gris suave y delimitado
+        border_focus = "#1D4ED8"     # Azul real corporativo
+        text_primary = "#0F172A"     # Gris carbón casi negro (máxima legibilidad)
+        text_secondary = "#475569"   # Gris pizarra para etiquetas secundarias
+        table_alt = "#F1F5F9"        # Filas alternadas suaves
+        table_grid = "#E2E8F0"       # Líneas sutiles de cuadrícula
+        sidebar_bg = "#0F172A"       # Barra lateral institucional azul noche
+        card_bg = "#FFFFFF"          # Fondo blanco de tarjetas
         status_bg = "#FFFFFF"
         status_border = "#E2E8F0"
+        header_bg = "#0F2942"        # Encabezados Azul Marino Institucional
+        header_border = "#1E3A8A"
 
     return f"""
-        /* Estilos Globales de Ventanas y Diálogos */
+        /* =======================================================
+           TIPOGRAFÍA Y ESTILOS GLOBALES (INSTITUCIÓN FINANCIERA)
+           ======================================================= */
         QMainWindow, QDialog {{
             background-color: {bg_main};
             color: {text_primary};
         }}
         QWidget {{
             color: {text_primary};
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", Arial, sans-serif;
             font-size: 13px;
         }}
 
-        /* Barra Lateral (Sidebar) */
+        /* Barra Lateral (Sidebar Ejecutiva) */
         QFrame#sidebar {{
             background-color: {sidebar_bg};
             border-right: 1px solid #1E293B;
@@ -70,31 +83,33 @@ def get_theme_stylesheet(theme: str = "claro") -> str:
             color: #FFFFFF;
         }}
         QPushButton.nav-btn:checked {{
-            background-color: #2563EB;
+            background-color: #1D4ED8;
             color: #FFFFFF;
             font-weight: bold;
         }}
 
-        /* Tarjetas, Grupos y Paneles */
+        /* Tarjetas, Grupos y Paneles de Información */
         QGroupBox {{
             background-color: {card_bg};
-            border: 1px solid {border_input};
+            border: 1.5px solid {border_input};
             border-radius: 8px;
             margin-top: 14px;
             font-weight: bold;
             color: {text_primary};
-            padding: 14px 10px 10px 10px;
+            padding: 14px 12px 12px 12px;
         }}
         QGroupBox::title {{
             subcontrol-origin: margin;
             subcontrol-position: top left;
-            left: 12px;
-            padding: 0 6px;
+            left: 14px;
+            padding: 0 8px;
             color: {text_primary};
             background-color: {card_bg};
+            font-size: 13px;
+            font-weight: bold;
         }}
 
-        /* Etiquetas */
+        /* Etiquetas de Texto */
         QLabel {{
             color: {text_primary};
             background-color: transparent;
@@ -103,7 +118,9 @@ def get_theme_stylesheet(theme: str = "claro") -> str:
             color: {text_secondary};
         }}
 
-        /* CAMPOS DE TEXTO Y ENTRADA (VISIBILIDAD 100% GARANTIZADA) */
+        /* =======================================================
+           CAMPOS DE ENTRADA Y FORMULARIOS (ALTA VISIBILIDAD)
+           ======================================================= */
         QLineEdit, QTextEdit, QPlainTextEdit,
         QSpinBox, QDoubleSpinBox, QDateEdit {{
             background-color: {bg_input} !important;
@@ -112,7 +129,7 @@ def get_theme_stylesheet(theme: str = "claro") -> str:
             border-radius: 6px;
             padding: 7px 10px;
             font-size: 13px;
-            selection-background-color: #2563EB;
+            selection-background-color: #1D4ED8;
             selection-color: #FFFFFF;
         }}
         QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus,
@@ -121,12 +138,13 @@ def get_theme_stylesheet(theme: str = "claro") -> str:
             background-color: {bg_input} !important;
             color: {text_primary} !important;
         }}
-        QLineEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled {{
+        QLineEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QDateEdit:disabled {{
             background-color: {table_alt} !important;
             color: {text_secondary} !important;
+            border: 1px dashed {border_input};
         }}
 
-        /* Menús desplegables (QComboBox) */
+        /* Selectores Desplegables (QComboBox) */
         QComboBox {{
             background-color: {bg_input} !important;
             color: {text_primary} !important;
@@ -147,68 +165,70 @@ def get_theme_stylesheet(theme: str = "claro") -> str:
         QComboBox QAbstractItemView {{
             background-color: {bg_input} !important;
             color: {text_primary} !important;
-            selection-background-color: #2563EB;
+            selection-background-color: #1D4ED8;
             selection-color: #FFFFFF;
             border: 1px solid {border_input};
             padding: 4px;
         }}
 
-        /* Tablas */
+        /* =======================================================
+           TABLAS FINANCIERAS (ENCABEZADOS AZUL MARINO Y CUADRÍCULA)
+           ======================================================= */
         QTableWidget {{
             background-color: {card_bg};
             alternate-background-color: {table_alt};
             color: {text_primary};
             gridline-color: {table_grid};
-            border: 1px solid {border_input};
-            border-radius: 6px;
-            selection-background-color: #2563EB;
+            border: 1.5px solid {border_input};
+            border-radius: 8px;
+            selection-background-color: #1D4ED8;
             selection-color: #FFFFFF;
         }}
         QTableWidget QTableCornerButton::section {{
-            background-color: #1E3A8A;
-            border: 1px solid #1E3A8A;
+            background-color: {header_bg};
+            border: 1px solid {header_border};
         }}
         QHeaderView::section {{
-            background-color: #1E3A8A;
+            background-color: {header_bg};
             color: #FFFFFF;
             font-weight: bold;
             font-size: 12px;
-            padding: 6px;
-            border: 0.5px solid #1E40AF;
+            padding: 8px;
+            border: 0.5px solid {header_border};
         }}
 
         /* Pestañas (QTabWidget) */
         QTabWidget::pane {{
             border: 1px solid {border_input};
             background-color: {card_bg};
-            border-radius: 6px;
+            border-radius: 8px;
             top: -1px;
         }}
         QTabBar::tab {{
             background-color: {table_alt};
             color: {text_secondary};
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
             border: 1px solid {border_input};
             border-bottom: none;
-            margin-right: 2px;
+            margin-right: 3px;
             font-weight: 500;
         }}
         QTabBar::tab:selected {{
             background-color: {card_bg};
             color: {text_primary};
             font-weight: bold;
-            border-bottom: 2px solid #2563EB;
+            border-bottom: 2.5px solid #1D4ED8;
         }}
         QTabBar::tab:hover {{
             background-color: {bg_surface};
             color: {text_primary};
         }}
 
-        /* Calendario (QCalendarWidget) */
+        /* Calendario de Vencimientos */
         QCalendarWidget QWidget#qt_calendar_navigationbar {{
-            background-color: #1E3A8A;
+            background-color: {header_bg};
             color: #FFFFFF;
         }}
         QCalendarWidget QToolButton {{
@@ -219,31 +239,82 @@ def get_theme_stylesheet(theme: str = "claro") -> str:
         QCalendarWidget QTableView {{
             background-color: {card_bg};
             color: {text_primary};
-            selection-background-color: #2563EB;
+            selection-background-color: #1D4ED8;
             selection-color: #FFFFFF;
         }}
         QCalendarWidget QSpinBox {{
             color: #FFFFFF !important;
-            background-color: #1E40AF !important;
+            background-color: #1E3A8A !important;
         }}
 
-        /* Botones Generales */
+        /* =======================================================
+           BOTONES DE ACCIÓN FINANCIERA (PALETA SEMÁNTICA)
+           ======================================================= */
         QPushButton {{
             border-radius: 6px;
             padding: 7px 14px;
             font-weight: 600;
+            font-size: 12.5px;
+            border: none;
         }}
         QPushButton:hover {{
-            opacity: 0.9;
+            opacity: 0.92;
+        }}
+        QPushButton:pressed {{
+            opacity: 0.82;
         }}
 
-        /* Barra de Estado */
+        /* Botón Primario: Azul Marino Institucional */
+        QPushButton[class="btn-primary"] {{
+            background-color: #1D4ED8;
+            color: #FFFFFF;
+        }}
+        /* Botón Éxito / Pagos: Verde Esmeralda */
+        QPushButton[class="btn-success"] {{
+            background-color: #059669;
+            color: #FFFFFF;
+        }}
+        /* Botón Advertencia / Pendientes: Ámbar Dorado */
+        QPushButton[class="btn-warning"] {{
+            background-color: #D97706;
+            color: #FFFFFF;
+        }}
+        /* Botón Peligro / Cancelación: Rojo Carmesí */
+        QPushButton[class="btn-danger"] {{
+            background-color: #DC2626;
+            color: #FFFFFF;
+        }}
+        /* Botón Secundario / Neutro: Gris Pizarra */
+        QPushButton[class="btn-secondary"] {{
+            background-color: #475569;
+            color: #FFFFFF;
+        }}
+
+        /* Barra de Desplazamiento (Scrollbar Elegante) */
+        QScrollBar:vertical {{
+            background: {bg_main};
+            width: 10px;
+            margin: 0px;
+            border-radius: 5px;
+        }}
+        QScrollBar::handle:vertical {{
+            background: {border_input};
+            min-height: 20px;
+            border-radius: 5px;
+        }}
+        QScrollBar::handle:vertical:hover {{
+            background: #94A3B8;
+        }}
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+            height: 0px;
+        }}
+
+        /* Barra de Estado Inferior */
         QStatusBar {{
             background-color: {status_bg};
             border-top: 1px solid {status_border};
             color: {text_secondary};
             font-size: 12px;
+            padding: 3px;
         }}
     """
-
-

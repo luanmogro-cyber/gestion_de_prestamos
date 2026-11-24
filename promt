@@ -476,3 +476,22 @@ proyecto_prestamos/
      - **No otorga permisos en el software:** Es meramente informativo y de perfilamiento financiero.
   3. **Mejora en la Interfaz Gráfica:**
      - Se renombró la etiqueta en `clients_view.py` a *"Ocupación del Cliente"* con texto de ayuda (*"Ej: Empleado, Comerciante, Independiente..."*) y tooltip explicativo para guiar al usuario de forma intuitiva.
+
+
+---
+
+### Registro 23: Implementación Integral de la Paleta de Colores de Entidades Financieras y Tipografía Ejecutiva
+- **Fecha:** 2026-11-24
+- **Petición del Usuario:**
+  > "no se te olvide usar lo que es la paleta de colores e implementarla en el proyecto" (En concordancia con el punto 4 de la Foto 1: *"paleta colores financieras / font"*)
+- **Acciones y Mejoras de Diseño Implementadas:**
+  1. **Definición de la Paleta Semántica Bancaria / Fintech:**
+     - **Azul Marino Profundo (`#0F2942` / `#1E3A8A` / `#1D4ED8`):** Representa solidez, seguridad institucional y confianza. Se aplicó en encabezados de tablas financieras, barra lateral ejecutiva, títulos corporativos y botones principales de acción.
+     - **Verde Esmeralda / Cash (`#059669` / `#10B981`):** Simboliza liquidez, abonos aplicados con éxito, botones de nuevo crédito y distintivo de estado *"SALDADO"*.
+     - **Ámbar Dorado / Advertencia (`#D97706` / `#F59E0B`):** Destaca los intereses devengados, el saldo exigible pendiente y cuotas próximas a vencer.
+     - **Rojo Carmesí / Riesgo (`#DC2626` / `#EF4444`):** Utilizado exclusivamente para alertar estados de mora y botones de eliminación segura.
+     - **Slate Neutro (`#F8FAFC` Modo Día / `#0B1120` Modo Noche):** Superficies ejecutivas limpias con bordes suaves que previenen el cansancio visual.
+  2. **Tipografía Financiera:**
+     - Pila tipográfica basada en `Segoe UI`, `Inter`, `Roboto` y `-apple-system`, con renderizado nítido de números monetarios (`$X.XXX.XXX,XX`) y jerarquía visual de pesos (700 para saldos, 600 para títulos, 500 para datos).
+  3. **Aplicación Transversal:**
+     - Se armonizaron todos los componentes visuales en `theme_manager.py`, `main_window.py`, `clients_view.py`, `loans_view.py`, `payments_view.py`, `reports_view.py` y `settings_view.py`, tanto en Modo Día como en Modo Noche dinámico.
