@@ -17,6 +17,10 @@ from backend.business.payment_service import PaymentService
 @pytest.fixture
 def temp_env(tmp_path):
     """Configura un entorno aislado en /tmp para pruebas unitarias."""
+    import os
+    os.environ["XDG_CONFIG_HOME"] = str(tmp_path / "config")
+    os.environ["XDG_DATA_HOME"] = str(tmp_path / "data")
+    ConfigManager._instance = None
     db_file = tmp_path / "test_prestamos.db"
     config = ConfigManager()
     
@@ -382,5 +386,155 @@ def test_filesystem_error_handling_so10(temp_env):
     err_eacces = OSError(13, "Permission denied")
     with pytest.raises(PermissionDeniedError, match="Permiso denegado"):
         db_mgr._handle_fs_error(err_eacces, "Acceso a directorio protegido")
+
+# --------------------------------------------------------------------------
+# 14. ABONO DIRECTO A CAPITAL Y RECALCULO DE SALDO
+# --------------------------------------------------------------------------
+def test_abono_directo_a_capital(temp_env):
+    client_srv = temp_env["clients"]
+    calc = temp_env["calc"]
+    pay_srv = temp_env["payments"]
+
+    cid = client_srv.create_client({
+        "doc_type": "CC", "doc_number": "888777666",
+        "first_name": "Laura", "last_name": "Restrepo",
+        "birth_date": "1995-03-20", "phone": "3201112233",
+        "email": "laura@test.com", "monthly_income": "6000000"
+    }, "admin")
+
+    lid = calc.create_loan(
+        client_id=cid, principal=Decimal("1000000.00"),
+        annual_interest_rate=Decimal("12.00"), installments_count=5,
+        periodicity="mensual", method="frances",
+        commission_type="ninguna", commission_value=Decimal("0.00"),
+        disbursement_date="2026-06-01", actor_username="admin"
+    )
+
+    # Abono directo a capital de $200.000
+    res = pay_srv.register_payment(
+        loan_id=lid, amount=Decimal("200000.00"), payment_type="capital",
+        payment_method="transferencia", actor_username="cajero"
+    )
+
+    assert res["capital_applied"] == Decimal("200000.00")
+    assert res["interest_applied"] == Decimal("0.00")
+    assert res["payment_type"] == "capital"
+
+# --------------------------------------------------------------------------
+# 15. BLOQUEO DE PAGOS EN CRÉDITO SALDADO
+# --------------------------------------------------------------------------
+def test_bloqueo_credito_saldado(temp_env):
+    client_srv = temp_env["clients"]
+    calc = temp_env["calc"]
+    pay_srv = temp_env["payments"]
+
+    cid = client_srv.create_client({
+        "doc_type": "CC", "doc_number": "777666555",
+        "first_name": "Mario", "last_name": "Bros",
+        "birth_date": "1985-09-13", "phone": "3154445566",
+        "email": "mario@test.com", "monthly_income": "8000000"
+    }, "admin")
+
+    lid = calc.create_loan(
+        client_id=cid, principal=Decimal("100000.00"),
+        annual_interest_rate=Decimal("10.00"), installments_count=1,
+        periodicity="mensual", method="frances",
+        commission_type="ninguna", commission_value=Decimal("0.00"),
+        disbursement_date="2026-01-01", actor_username="admin"
+    )
+
+    # Liquidar todo el crédito
+    res = pay_srv.register_payment(
+        loan_id=lid, amount=Decimal("200000.00"), payment_type="cuota",
+        payment_method="efectivo", actor_username="cajero"
+    )
+    assert res["is_settled"] is True
+    assert res["new_loan_status"] == "cancelado"
+
+    # Intentar pagar nuevamente debe fallar con mensaje claro
+    with pytest.raises(ValueError, match="ya se encuentra totalmente SALDADO"):
+        pay_srv.register_payment(
+            loan_id=lid, amount=Decimal("50000.00"), payment_type="cuota",
+            payment_method="efectivo", actor_username="cajero"
+        )
+
+# --------------------------------------------------------------------------
+# 16. BÚSQUEDA MULTICRITERIO DIDÁCTICA Y PAGARÉ ASOCIADO (FOTO 2)
+# --------------------------------------------------------------------------
+def test_busqueda_didactica_multicriterio_y_pagare(temp_env):
+    client_srv = temp_env["clients"]
+    calc = temp_env["calc"]
+    pay_srv = temp_env["payments"]
+
+    cid = client_srv.create_client({
+        "doc_type": "CC", "doc_number": "999000111",
+        "first_name": "Luigi", "last_name": "Verdi",
+        "birth_date": "1988-02-14", "phone": "3167778899",
+        "email": "luigi@test.com", "monthly_income": "7500000"
+    }, "admin")
+
+    lid = calc.create_loan(
+        client_id=cid, principal=Decimal("5000000.00"),
+        annual_interest_rate=Decimal("15.00"), installments_count=12,
+        periodicity="mensual", method="frances",
+        commission_type="ninguna", commission_value=Decimal("0.00"),
+        disbursement_date="2026-05-10", actor_username="admin"
+    )
+
+    # 1. Búsqueda por documento
+    res_doc = pay_srv.search_loans_and_clients("999000111")
+    assert len(res_doc) >= 1
+    assert res_doc[0]["loan_id"] == lid
+    assert "PAG-" in res_doc[0]["pagare_number"]
+    assert res_doc[0]["nombre"] == "Luigi Verdi"
+
+    # 2. Búsqueda por nombre
+    res_nom = pay_srv.search_loans_and_clients("Luigi")
+    assert len(res_nom) >= 1
+    assert res_nom[0]["loan_id"] == lid
+
+    # 3. Búsqueda por pagaré
+    pagare = res_doc[0]["pagare_number"]
+    res_pag = pay_srv.search_loans_and_clients(pagare)
+    assert len(res_pag) >= 1
+    assert res_pag[0]["pagare_number"] == pagare
+
+# --------------------------------------------------------------------------
+# 17. ELIMINAR PAGO Y RESTAURAR SALDO
+# --------------------------------------------------------------------------
+def test_eliminar_pago_restaura_saldo(temp_env):
+    client_srv = temp_env["clients"]
+    calc = temp_env["calc"]
+    pay_srv = temp_env["payments"]
+
+    cid = client_srv.create_client({
+        "doc_type": "CC", "doc_number": "98765432101",
+        "first_name": "Sofia", "last_name": "Lopez",
+        "birth_date": "1994-07-08", "phone": "3189990011",
+        "email": "sofia_unique@test.com", "monthly_income": "4000000"
+    }, "admin")
+
+    lid = calc.create_loan(
+        client_id=cid, principal=Decimal("300000.00"),
+        annual_interest_rate=Decimal("12.00"), installments_count=3,
+        periodicity="mensual", method="frances",
+        commission_type="ninguna", commission_value=Decimal("0.00"),
+        disbursement_date="2026-01-01", actor_username="admin"
+    )
+
+    pay_res = pay_srv.register_payment(
+        loan_id=lid, amount=Decimal("100000.00"), payment_type="cuota",
+        payment_method="efectivo", actor_username="cajero"
+    )
+    pid = pay_res["payment_id"]
+
+    # Eliminar pago
+    ok = pay_srv.delete_payment(pid, actor_username="admin")
+    assert ok is True
+
+    # Verificar que el pago ya no existe en el historial
+    hist = pay_srv.list_payments(lid)
+    assert all(p["id"] != pid for p in hist)
+
 
 

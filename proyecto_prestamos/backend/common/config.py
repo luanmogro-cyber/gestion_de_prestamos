@@ -73,13 +73,31 @@ class ConfigManager:
         self._initialized = True
 
     def _ensure_directories(self):
-        """Crea los directorios con permisos 700 (SO-05)."""
+        """Crea los directorios con permisos 700 (SO-05), con manejo resiliente ante restricciones de permisos."""
         for d in [self.config_dir, self.data_dir, self.backup_dir, self.logs_dir]:
-            d.mkdir(parents=True, exist_ok=True)
             try:
-                os.chmod(d, 0o700)
-            except (OSError, NotImplementedError):
-                pass
+                d.mkdir(parents=True, exist_ok=True)
+                try:
+                    os.chmod(d, 0o700)
+                except (OSError, NotImplementedError):
+                    pass
+            except (PermissionError, OSError):
+                # Si no tiene permisos en el home del usuario (ej. sandbox Windows), utilizar ruta local de respaldo
+                fallback_base = Path(__file__).resolve().parent.parent.parent / ".system_data"
+                try:
+                    fallback_base.mkdir(parents=True, exist_ok=True)
+                    self.config_dir = fallback_base / "config"
+                    self.data_dir = fallback_base / "data"
+                    self.backup_dir = self.data_dir / "backups"
+                    self.logs_dir = self.data_dir / "logs"
+                    self.config_file = self.config_dir / "config.json"
+                    self.db_path = self.data_dir / "prestamos.db"
+                    self.ipc_socket_path = self.data_dir / "ipc.sock"
+                    for fb_dir in [self.config_dir, self.data_dir, self.backup_dir, self.logs_dir]:
+                        fb_dir.mkdir(parents=True, exist_ok=True)
+                except Exception:
+                    pass
+                break
 
     def load(self):
         """Carga el archivo config.json o crea uno con valores por defecto."""

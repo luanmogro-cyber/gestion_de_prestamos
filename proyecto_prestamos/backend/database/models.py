@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS loans (
     commission_type TEXT CHECK (commission_type IN ('porcentaje', 'fijo', 'ninguna')),
     commission_value TEXT NOT NULL DEFAULT '0.00',
     total_amount TEXT NOT NULL,
+    pagare_number TEXT,
     status TEXT NOT NULL DEFAULT 'activo' CHECK (status IN ('simulado', 'activo', 'en_mora', 'cancelado', 'castigado')),
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE RESTRICT
@@ -80,6 +81,8 @@ CREATE TABLE IF NOT EXISTS payments (
     amount TEXT NOT NULL,
     payment_date TEXT NOT NULL,
     payment_method TEXT NOT NULL CHECK (payment_method IN ('efectivo', 'transferencia', 'tarjeta', 'cheque')),
+    payment_type TEXT NOT NULL DEFAULT 'cuota',
+    payment_time TEXT,
     late_fee_allocated TEXT NOT NULL DEFAULT '0.00',
     interest_allocated TEXT NOT NULL DEFAULT '0.00',
     capital_allocated TEXT NOT NULL DEFAULT '0.00',
@@ -121,6 +124,22 @@ def initialize_database(db_manager: DatabaseManager):
     with db_manager.connection(exclusive_lock=True) as conn:
         cursor = conn.cursor()
         cursor.executescript(SCHEMA_SQL)
+
+        # Migración dinámica de columnas nuevas si la base de datos ya existía
+        cursor.execute("PRAGMA table_info(loans);")
+        loan_cols = [c["name"] for c in cursor.fetchall()]
+        if "pagare_number" not in loan_cols:
+            cursor.execute("ALTER TABLE loans ADD COLUMN pagare_number TEXT;")
+            cursor.execute("SELECT id FROM loans WHERE pagare_number IS NULL OR pagare_number = '';")
+            for row in cursor.fetchall():
+                cursor.execute("UPDATE loans SET pagare_number = ? WHERE id = ?;", (f"PAG-{row['id']:04d}", row["id"]))
+
+        cursor.execute("PRAGMA table_info(payments);")
+        pay_cols = [c["name"] for c in cursor.fetchall()]
+        if "payment_type" not in pay_cols:
+            cursor.execute("ALTER TABLE payments ADD COLUMN payment_type TEXT NOT NULL DEFAULT 'cuota';")
+        if "payment_time" not in pay_cols:
+            cursor.execute("ALTER TABLE payments ADD COLUMN payment_time TEXT;")
 
         # Sembrar usuario administrador inicial si la tabla está vacía
         cursor.execute("SELECT COUNT(*) as cnt FROM users;")

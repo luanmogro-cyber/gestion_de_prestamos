@@ -403,3 +403,42 @@ proyecto_prestamos/
   1. **Subida a GitHub:** Se ejecutó con éxito `git push -u origin main` hacia `https://github.com/luanmogro-cyber/gestion_de_prestamos.git`, subiendo todo el código fuente desacoplado, tests, scripts de ejecución y documentación.
   2. **Conexión y Despliegue en Railway:** Se vinculó el repositorio `luanmogro-cyber/gestion_de_prestamos@main` al servicio `gestion_de_prestamos` (ID: `49d85d9c-3157-4509-8df7-ffee5908ef8c`) del proyecto `gestion_de_prestamos` en Railway Cloud. Se inició de forma autónoma la primera compilación y despliegue (Deployment ID: `cde1f0b0-544c-42e5-b2ff-e34bc9715df5`).
   3. **Comandos de Ejecución Local:** Se detallaron los comandos oficiales para lanzar la aplicación gráfica desde la terminal integrada de Laragon y PowerShell tanto en modo simple como en modo dual.
+
+
+---
+
+### Registro 20: Rediseño Didáctico y Minimalista, Búsqueda Multicriterio, Pagaré y Gestión Flexible de Abonos
+- **Fecha:** 2026-11-24
+- **Petición del Usuario:**
+  > "Hola, quiero que el sistema sea un poco mas didactico, mas minimalista y que tenga uun manejo flexible para que lo entiendan todo tipo de personas hasta un niño se pueda guiar por intuicion dentro dell sistema, tambien quiero que el sistema a cada usuario o bueno a cada cliente que se le hace un prestamo este se enumere y que por ejemplo yo pueda buscar a un cliente este lo pueda buscar or el numero de documento, ell nombre o por el credito osea que el cliente tenga un numero asociado o pagare y que esto facilite la busqueda, tambien quiero que el sistema genere llo que son los reportes, y al buscar al cliente me aparezcan todos los prestamos que se han hecho, tambien quiero que le agregues llo que es la tablla para poder pagar y si digamos que la persona tiene tantos prestamos estos se puedan cancelar o bueno pagar, si el cliente le va a abonar me de la opcion de elegir si este es para abono a capital o abono a interes y que ya uuna vez alcanzado el monto o cacenllado la deuda total este ya no me deje agregarle mas pagos y que de un aviso de que ya está sal,dado esa deuda, tambien quiero que tenga un boton esa tabla justo al frente del prestamo donde este me permita ver las cuotas que el cliente ha pagado hasta la fecha y que tambien me permita eliminar o edidtar una cuota que tenga una información nada, al momento de abonar a ña deuda me aparezca una tabla y que esta pida llos siguientes datos, muestre la fecha y que eso lo haga automaticamente, que me muestre la fecha y hora real a la que se está haciendo el abono, que me edeje abonar si es a capital o a interes. Las fotos que están adjuntas son sugerencias que me han dado y quiero que las implementes tomando en cuenta todo lo que dice, en lla foto dos esa es la información que debe aparecer en las tablas cuando uno busque al cliente, así es como debe de aparecer"
+- **Acciones / Cambios Implementados:**
+  1. **Estructura de Base de Datos y Modelos:**
+     - Se añadió la columna `pagare_number` a la tabla `loans` (autogeneración con formato correlativo `PAG-0001` o `CRE-0001`).
+     - Cada cliente queda identificado con su código único `CLI-0001` y documento.
+     - Se añadieron las columnas `payment_type` ('capital', 'interes', 'cuota') y `payment_time` a la tabla `payments`.
+     - Se implementó migración automática sin pérdida de datos en `models.py`.
+  2. **Búsqueda Multicriterio Unificada:**
+     - En `payment_service.py` se programó `search_loans_and_clients(query)` que permite buscar en tiempo real por número de documento, nombre, apellidos, número de crédito o pagaré (`PAG-0001`), y código de cliente.
+     - Al buscar a un cliente, se listan inmediatamente todos los créditos que tiene asignados.
+  3. **Tabla de Créditos con Columnas Exactas de la Pizarra (Foto 2):**
+     - Columnas: `Pagaré / Crédito` | `Documento` | `Nombre` | `Monto` | `Fecha` | `# Cuota / Plazo` | `Capital` | `Interés` | `Saldo` | `Estado` | `Acciones`.
+     - `# Cuota / Plazo` informa didácticamente las cuotas pagadas sobre el total (ej. `3 / 12 pagadas`).
+     - `Capital`, `Interés` y `Saldo` muestran los importes exigibles en tiempo real con colores de alto contraste financiero.
+  4. **Diálogo Didáctico de Abono / Pago (`PaymentModalDialog`):**
+     - Registra y muestra la **Fecha y Hora real automáticamente** mediante reloj en tiempo real (`QTimer`).
+     - Selector didáctico de tipo de abono:
+       - 🟢 **Abono a Capital:** amortiza directamente la deuda principal disminuyendo el saldo total.
+       - 🔵 **Abono a Intereses:** cancela intereses causados sin reducir capital.
+       - 🟡 **Pago de Cuota Regular:** aplica la prelación legal (Mora -> Interés -> Capital).
+     - Botones de un solo clic para sugerir el valor de 1 cuota o liquidar todo el saldo.
+     - **Validación de Deuda Saldada:** Si el saldo ya es $0 o el préstamo está saldado, el sistema bloquea cualquier nuevo pago y muestra un aviso visual destacado: *"🎉 ¡ESTE PRÉSTAMO YA ESTÁ COMPLETAMENTE SALDADO!"*.
+     - Al liquidar un crédito con un abono, emite una felicitación visual de cancelación total.
+  5. **Historial de Cuotas Pagadas y Edición / Eliminación (`InstallmentsHistoryDialog`):**
+     - Botón `📋 Cuotas` al frente de cada préstamo.
+     - Muestra todas las cuotas y abonos realizados a la fecha con su fecha y hora real exacta, tipo y desglose.
+     - Botón `✏️ Editar`: permite modificar montos, métodos o notas por error humano de digitación.
+     - Botón `🗑️ Eliminar`: revierte el abono, recalcula el saldo restante del préstamo y restaura el estado a activo/en mora.
+  6. **Generación de Reportes PDF:**
+     - Botón `📄 PDF` al frente de cada préstamo para exportar el estado de cuenta y cronograma oficial.
+  7. **Suite de Pruebas Automatizadas:**
+     - Se crearon 4 nuevas pruebas unitarias (`test_abono_directo_a_capital`, `test_bloqueo_credito_saldado`, `test_busqueda_didactica_multicriterio_y_pagare`, `test_eliminar_pago_restaura_saldo`), alcanzando 17 pruebas unitarias aprobadas al 100%.

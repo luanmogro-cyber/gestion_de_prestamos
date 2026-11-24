@@ -322,6 +322,8 @@ class LoanCalculator:
                 )
             )
             loan_id = cursor.lastrowid
+            pagare_num = f"PAG-{loan_id:04d}"
+            cursor.execute("UPDATE loans SET pagare_number = ? WHERE id = ?;", (pagare_num, loan_id))
 
             # Insertar cuotas
             for item in cronograma:
