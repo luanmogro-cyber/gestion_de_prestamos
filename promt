@@ -457,3 +457,22 @@ proyecto_prestamos/
 - **Solución y Mejoras Implementadas:**
   1. Se mejoró la lógica de los scripts ejecutables `ejecutar.bat` en ambos niveles del proyecto para que detecten automáticamente si ya están en `proyecto_prestamos` o en la raíz, evitando fallos de ruta relativa.
   2. Se instruyó al usuario a ejecutar directamente el comando de arranque `python prestamos_gui_app.py` (o `python lanzar_dual.py`) sin necesidad de cambiar de directorio, o hacer doble clic en `ejecutar.bat`.
+
+
+---
+
+### Registro 22: Clarificación Conceptual entre Ocupación del Cliente y Rol de Usuario
+- **Fecha:** 2026-11-24
+- **Petición / Consulta del Usuario:**
+  > "en la opcion de ocupacion o de cargo se pone es lo que quiero que el sea en mi proyecto por ejemplo si le pongo que empleado es solo una etiqueta para saber a que se dedica o para que"
+- **Aclaración Conceptual y Pedagógica:**
+  1. **Diferencia entre Usuario y Cliente:**
+     - **Usuario del Sistema (`users`):** Es la persona que inicia sesión en el software (empleados de la financiera). Tiene un **Rol** (`Administrador` o `Cajero`) que define estrictamente sus permisos dentro del programa (quién puede condonar moras, configurar tasas o solo registrar cobros).
+     - **Cliente (`clients`):** Es la persona externa que solicita el dinero prestado.
+  2. **Propósito del campo "Ocupación":**
+     - Es la **actividad económica o profesión real del cliente** (ej: *Empleado de empresa, Comerciante, Conductor, Docente, Independiente*).
+     - **Perfil crediticio y solvencia:** En el análisis financiero, sirve junto a los *Ingresos Mensuales* para evaluar la estabilidad de pago del solicitante.
+     - **Validez contractual:** Es un requisito legal que aparece impreso en el pagaré, contrato y cronograma de amortización en PDF.
+     - **No otorga permisos en el software:** Es meramente informativo y de perfilamiento financiero.
+  3. **Mejora en la Interfaz Gráfica:**
+     - Se renombró la etiqueta en `clients_view.py` a *"Ocupación del Cliente"* con texto de ayuda (*"Ej: Empleado, Comerciante, Independiente..."*) y tooltip explicativo para guiar al usuario de forma intuitiva.

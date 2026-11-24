@@ -97,7 +97,9 @@ class ClientFormDialog(QDialog):
         form.addRow("Dirección de Residencia:", self.txt_address)
 
         self.txt_occupation = QLineEdit(self.client_data.get("occupation", "Empleado"))
-        form.addRow("Ocupación / Cargo:", self.txt_occupation)
+        self.txt_occupation.setPlaceholderText("Ej: Empleado, Comerciante, Independiente, Docente...")
+        self.txt_occupation.setToolTip("Actividad laboral a la que se dedica el cliente en la vida real. Sirve para evaluar su perfil de ingresos y capacidad crediticia.")
+        form.addRow("Ocupación del Cliente:", self.txt_occupation)
 
         self.txt_income = QLineEdit(str(self.client_data.get("monthly_income", "2500000")))
         self.txt_income.setPlaceholderText("Ej: 2500000")

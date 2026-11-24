@@ -208,6 +208,7 @@ Este apartado recopila todos los cambios y mejoras incorporadas cronológicament
 | **19** | 2026-11-23 | Éxito en sincronización con GitHub y despliegue activo en Railway Cloud. | Push completo a `luanmogro-cyber/gestion_de_prestamos@main` y despliegue automático del servicio en Railway con URL pública HTTPS. |
 | **20** | 2026-11-24 | Rediseño Didáctico y Minimalista, Búsqueda Multicriterio, Pagaré y Gestión Flexible de Abonos. | Implementación de las sugerencias de la pizarra (Foto 1 y Foto 2): búsqueda unificada por Documento/Nombre/Pagaré, tabla con columnas exactas de la pizarra, abonos directos a Capital/Intereses/Cuota con fecha y hora real automática, aviso visual y bloqueo estricto cuando la deuda está saldada, y diálogo de historial con edición y eliminación de cuotas. |
 | **21** | 2026-11-24 | Diagnóstico de ruta en Terminal de Laragon y ejecución directa. | Identificación de ubicación actual en la terminal; optimización de scripts `ejecutar.bat` con detección dinámica de directorio y arranque directo. |
+| **22** | 2026-11-24 | Clarificación conceptual entre Ocupación del Cliente y Rol de Usuario. | Distinción pedagógica entre Rol del sistema (`Administrador`/`Cajero` para permisos) y Ocupación del cliente (actividad económica real para perfil de riesgo y pagaré). |
 
 ---
 
