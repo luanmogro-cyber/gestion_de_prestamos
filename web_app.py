@@ -34,8 +34,8 @@ payment_service = PaymentService(db_manager)
 # Sembrar datos de demostración si la base de datos está vacía
 def seed_demo_data():
     try:
-        clients = client_service.list_clients()
-        if not clients:
+        clients_list, _ = client_service.list_clients()
+        if not clients_list:
             print("🌱 Sembrando datos demostrativos en la base de datos SQLite...")
             # Cliente 1
             cid1 = client_service.create_client({
@@ -111,6 +111,8 @@ class DecimalEncoder(json.JSONEncoder):
             return float(obj)
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
+        if isinstance(obj, Path):
+            return str(obj)
         return super().default(obj)
 
 class CloudLoanManagementHandler(SimpleHTTPRequestHandler):
@@ -154,8 +156,8 @@ class CloudLoanManagementHandler(SimpleHTTPRequestHandler):
 
         # 3. Listar clientes
         if parsed.path == "/api/clients":
-            clients = client_service.list_clients()
-            self._send_json({"clients": clients})
+            clients_list, total = client_service.list_clients(page=1, page_size=100)
+            self._send_json({"clients": clients_list, "total": total})
             return
 
         # 4. Historial de cuotas y pagos de un préstamo
