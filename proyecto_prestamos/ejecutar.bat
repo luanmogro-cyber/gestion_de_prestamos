@@ -7,11 +7,23 @@ echo       INICIANDO SISTEMA DE GESTION DE PRESTAMOS
 echo ========================================================
 echo.
 
+if exist "prestamos_gui_app.py" (
+    goto RUN
+)
+if exist "proyecto_prestamos\prestamos_gui_app.py" (
+    cd proyecto_prestamos
+    goto RUN
+)
+
+:RUN
+echo [DIR] Carpeta de ejecucion: %CD%
+echo.
+
 if exist "C:\laragon\bin\python\python-3.13\python.exe" (
-    echo [OK] Utilizando entorno Python de Laragon (Python 3.13)
+    echo [OK] Ejecutando con Python de Laragon (Python 3.13)...
     "C:\laragon\bin\python\python-3.13\python.exe" prestamos_gui_app.py
 ) else (
-    echo [INFO] Utilizando Python del sistema
+    echo [INFO] Ejecutando con Python del sistema...
     python prestamos_gui_app.py
 )
 
@@ -20,4 +32,3 @@ if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Hubo un problema al iniciar la aplicacion.
     pause
 )
-

@@ -442,3 +442,18 @@ proyecto_prestamos/
      - Botón `📄 PDF` al frente de cada préstamo para exportar el estado de cuenta y cronograma oficial.
   7. **Suite de Pruebas Automatizadas:**
      - Se crearon 4 nuevas pruebas unitarias (`test_abono_directo_a_capital`, `test_bloqueo_credito_saldado`, `test_busqueda_didactica_multicriterio_y_pagare`, `test_eliminar_pago_restaura_saldo`), alcanzando 17 pruebas unitarias aprobadas al 100%.
+
+
+---
+
+### Registro 21: Diagnóstico de Error de Navegación de Directorio en Terminal Laragon
+- **Fecha:** 2026-11-24
+- **Petición del Usuario:**
+  > "lo que me dice en laragonn es que el sistema no puede encontrar la ruta ejecutada"
+- **Diagnóstico Técnico:**
+  1. En la captura previa de la terminal de Laragon, el prompt ya se encontraba ubicado directamente dentro de:
+     `C:\laragon\www\gestion_de_prestamos\proyecto_prestamos(main)`
+  2. Si el usuario intentó volver a ejecutar `cd C:\laragon\www\gestion_de_prestamos\proyecto_prestamos` o hubo una errata tipográfica en la ruta (ej. `laragonn` con doble 'n'), Windows responde con *"El sistema no puede encontrar la ruta especificada"*.
+- **Solución y Mejoras Implementadas:**
+  1. Se mejoró la lógica de los scripts ejecutables `ejecutar.bat` en ambos niveles del proyecto para que detecten automáticamente si ya están en `proyecto_prestamos` o en la raíz, evitando fallos de ruta relativa.
+  2. Se instruyó al usuario a ejecutar directamente el comando de arranque `python prestamos_gui_app.py` (o `python lanzar_dual.py`) sin necesidad de cambiar de directorio, o hacer doble clic en `ejecutar.bat`.
