@@ -210,6 +210,7 @@ Este apartado recopila todos los cambios y mejoras incorporadas cronológicament
 | **21** | 2026-11-24 | Diagnóstico de ruta en Terminal de Laragon y ejecución directa. | Identificación de ubicación actual en la terminal; optimización de scripts `ejecutar.bat` con detección dinámica de directorio y arranque directo. |
 | **22** | 2026-11-24 | Clarificación conceptual entre Ocupación del Cliente y Rol de Usuario. | Distinción pedagógica entre Rol del sistema (`Administrador`/`Cajero` para permisos) y Ocupación del cliente (actividad económica real para perfil de riesgo y pagaré). |
 | **23** | 2026-11-24 | Implementación de la Paleta de Colores de Entidades Financieras y Tipografía. | Configuración integral de colores bancarios (Azul Marino `#0F2942`, Verde Esmeralda `#059669`, Ámbar `#F59E0B` y Rojo Carmesí `#DC2626`) y tipografía ejecutiva en todas las vistas del proyecto (Foto 1). |
+| **24** | 2026-11-24 | Despliegue de la Base de Datos en Vivo y Aplicación Web Interactiva en Railway Cloud. | Conexión de `web_app.py` con el motor SQLite ACID (`DatabaseManager`), creación de endpoints REST (`/api/loans/search`, `/api/payments/register`, etc.), y frontend web completo con las tablas de la Foto 2, abonos y visor de base de datos en vivo. |
 
 ---
 

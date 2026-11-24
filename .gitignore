@@ -48,6 +48,7 @@ ipc.sock
 logs/
 .tmp/
 tmp/
+.system_data/
 
 # OS specific
 .DS_Store

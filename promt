@@ -495,3 +495,33 @@ proyecto_prestamos/
      - Pila tipográfica basada en `Segoe UI`, `Inter`, `Roboto` y `-apple-system`, con renderizado nítido de números monetarios (`$X.XXX.XXX,XX`) y jerarquía visual de pesos (700 para saldos, 600 para títulos, 500 para datos).
   3. **Aplicación Transversal:**
      - Se armonizaron todos los componentes visuales en `theme_manager.py`, `main_window.py`, `clients_view.py`, `loans_view.py`, `payments_view.py`, `reports_view.py` y `settings_view.py`, tanto en Modo Día como en Modo Noche dinámico.
+
+---
+
+### Registro 24: Despliegue de la Base de Datos en Vivo y Aplicación Web Interactiva en Railway Cloud
+- **Fecha:** 2026-11-24
+- **Petición del Usuario:**
+  > pero aun no se despliegua la base de datos y solo me mmuestra es esto qu ete muestro en la imagne, dime como hago ahí (Adjuntando captura de Railway con el simulador estático inicial)
+- **Diagnóstico Técnico y Causa Raíz:**
+  1. En el primer despliegue a Railway (Registros 13 al 19), se creó un archivo web_app.py básico con endpoints de salud (/health) y un simulador de cuotas en JavaScript para verificar el ciclo de compilación con Nixpacks y la propagación del dominio público en la nube.
+  2. Dicho archivo inicial no estaba conectado al motor SQLite local (DatabaseManager), por lo que la página web desplegada no permitía ver ni manipular la base de datos, ni consultar los clientes, préstamos o pagos de la Foto 2.
+- **Solución y Mejoras Implementadas:**
+  1. **Transformación de web_app.py en un Sistema Web Completo e Interactivo con SQLite:**
+     - Se conectó el servicio web a los servicios centrales del backend: DatabaseManager, initialize_database, ClientService, LoanCalculator y PaymentService.
+     - Se inicializa automáticamente la base de datos SQLite ACID (prestamos_cloud.db) en el entorno cloud.
+     - Se implementó la rutina seed_demo_data() que precarga automáticamente clientes demostrativos y créditos con pagarés si la base de datos está vacía.
+  2. **Implementación de Endpoints REST API de Negocio:**
+     - GET /api/loans/search?q=...: Búsqueda multicriterio en vivo (Documento, Nombre, Crédito, Pagaré) retornando exactamente los campos de la Foto 2 (documento, 
+ombre, monto, echa, cuotas_plazo, capital, interes, saldo, is_settled).
+     - GET /api/clients y POST /api/clients/create: Gestión de clientes en tiempo real.
+     - POST /api/loans/create: Creación de créditos con generación de pagaré.
+     - GET /api/payments: Historial de cuotas pagadas con desglose.
+     - POST /api/payments/register: Registro de abonos a Capital, Interés o Cuota con fecha y hora real automáticas y bloqueo visual y lógico al saldarse la deuda.
+     - POST /api/payments/delete: Reversión de pagos con recalibración de saldo.
+     - GET /api/db/stats: Métricas en vivo de la base de datos SQLite para sustentación técnica.
+  3. **Frontend Web Dinámico Basado en la Pizarra (Foto 1 y Foto 2):**
+     - Pestaña **Cobranzas (Foto 2)**: Tabla idéntica a la pizarra con búsqueda en tiempo real, modal de abono con reloj en vivo, botones rápidos y modal de historial de cuotas con edición y eliminación.
+     - Pestañas **Clientes**, **Nuevo Crédito** y **Base de Datos en Vivo** para visualización completa de datos en el navegador.
+     - Paleta de colores institucional financiera (Azul Marino #0F2942, Verde #059669, Ámbar #D97706).
+  4. **Despliegue y Sincronización:**
+     - Se versionó en Git, se sincronizó con GitHub (luanmogro-cyber/gestion_de_prestamos) y se actualizó el servicio en producción en Railway (https://gestiondeprestamos-production-e552d9f2.up.railway.app).
